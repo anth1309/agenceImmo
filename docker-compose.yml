@@ -1,0 +1,56 @@
+version: "3.7"
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginxAgenceImmo
+    ports:
+      - "8086:80"
+    volumes:
+      - ./api:/var/www
+    depends_on:
+      - php
+      - datab
+    networks:
+      - laravel
+
+  datab:
+    image: mysql
+    container_name: mysqlAgenceImmo
+    restart: unless-stopped
+    tty: true
+    environment:
+      MYSQL_DATABASE: agence_immo
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pmaAgenceImmo
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - datab
+    environment:
+      PMA_HOST: datab
+      PMA_USER: root
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./api:/var/www
+    ports:
+      - "9002:9000"
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
