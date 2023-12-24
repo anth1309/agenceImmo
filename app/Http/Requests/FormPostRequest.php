@@ -4,9 +4,9 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
-
-class PostsFilterRequest extends FormRequest
+class FormPostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,15 +21,18 @@ class PostsFilterRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    // public function rules(): array
-    // {
-    //     return [
-    //         'title' => ['required', 'min:5', 'max:20', 'unique:posts'],
-    //         'slug' => ['required', 'regex:/^[a-z0-9\-]+$/'],
-    //     ];
-    // }
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'min:5', 'max:30', Rule::unique('posts')->ignore($this->post)],
+            'slug' => ['required', 'min:5', 'regex:/^[0-9a-z\-]+$/', Rule::unique('posts')->ignore($this->post)],
+            'content' => ['required', 'min:10'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'tags' => ['array', 'exists:tags,id', 'required'],
+            'image' => ['image', 'max:20482'],
+        ];
+    }
 
-    //s il n y a pas e slug il le genere
     protected function prepareForValidation()
     {
         $this->merge([

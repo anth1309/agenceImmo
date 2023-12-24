@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostsController;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use PharIo\Manifest\AuthorElement;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,9 +104,20 @@ Route::prefix('blog')->name('blog.')->controller(PostsController::class)->group(
 
     Route::get('/',  'index')->name('index');
 
+    Route::get('/new', 'create')->name('create')->middleware('auth');
+    Route::post('/new', 'store')->name('store')->middleware('auth');
+    Route::get('/{post}/edit', 'edit')->name('edit')->middleware('auth');
+    Route::patch('/{post}/edit', 'update')->name('update')->middleware('auth');
     Route::get('/{slug}/{id}', 'show')
         ->where([
             'id' => '[0-9]+',
             'slug' => '[a-z0-9\-]+',
         ])->name('show');
+    Route::delete('/{post}', 'destroy')->name('destroy')->middleware('auth');
+
+    Route::prefix('auth')->name('auth.')->controller(AuthController::class)->group(function () {
+        Route::get('/login', 'login')->name('login');
+        Route::post('/login', 'doLogin');
+        Route::delete('/logout', 'logout')->name('logout');
+    });
 });
